@@ -36,6 +36,27 @@
             text-transform: uppercase;
             flex-grow: 1;
         }
+        
+        /* Khung thanh tìm kiếm ẩn mặc định */
+        .search-container {
+            display: none;
+            margin-bottom: 15px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: #38bdf8;
+        }
+
         #mod-list-container {
             max-height: 85vh;
             overflow-y: auto;
@@ -250,6 +271,11 @@
         <div style="width: 32px;"></div> <!-- Cân bằng header -->
     </div>
     
+    <!-- Thanh tìm kiếm (Mặc định ẩn) -->
+    <div class="search-container" id="searchContainer">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Nhập tên mod cần tìm..." oninput="renderModMenu()">
+    </div>
+
     <div id="mod-list-container"></div>
 
     <!-- Thanh Drawer Sidebar bên trái -->
@@ -257,6 +283,7 @@
         <h3>Menu Tùy Chọn</h3>
         <button class="sidebar-btn" onclick="resetPageCache()">🔄 Reset Page (Xóa Cache)</button>
         <button class="sidebar-btn" onclick="showFavoritesOnly()">❤️ Yêu thích đã lưu</button>
+        <button class="sidebar-btn" onclick="toggleSearchBox()">🔍 Tìm Kiếm Mod</button>
         <button class="sidebar-btn" onclick="showAllMods()" style="color: #38bdf8;">🏠 Xem Tất Cả Mod</button>
     </div>
     <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -322,13 +349,13 @@ ffmax: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/FFMAX_IG
 anh: https://lh3.googleusercontent.com/d/1_Z_rO44PcQiyRaD8Xz0h0txOI92GILB9
 mota: Thông Tin: Tóc hắc tinh áo kim long quần thv nấm đấm Long Trảo Quyền VIP
 
-MOD IGNIS TEXTURE 7D KAITO KID + LÔI XÍCH QUYỀN
+MOD IGNIS TEXTURE7D KAITO KID + LÔI XÍCH QUYỀN
 ffth: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/FFTH_IGNIS_KAITO_KID_V4.zip
 ffmax: 
 anh: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/refs/heads/main/Screenshot_20260829-161459_Module%20Manager.jpg
 mota: kaito kid nhân vật ignis
 
-MOD KAPELLA GÓI HỌA NỮ VÚ BỰ CỰC MÚP
+MOD KAPELLA GÓI HỌA NŨ VÚ BỰ CỰC MÚP
 ffth: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/FFTH_GOI_DO_HOA_NU_FFTH.zip
 ffmax: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/FFMAX_GOI_DO_HOA_NU_MAX.zip
 anh: https://lh3.googleusercontent.com/d/1ITOLEg2aogwPlLXADEMKSqUrk1TiyTml
@@ -344,6 +371,7 @@ mota: Thông Tin: TÓC SÓI NẠ DUNG NHAM ÁO ĐẤU SĨ HUYỀN THOẠI QUẦN
         let parsedMods = [];
         let favorites = JSON.parse(localStorage.getItem('mz_favorites')) || [];
         let viewingFavoritesOnly = false;
+        let searchActive = false;
 
         function parseModsText(text) {
             const blocks = text.trim().split(/\n\s*\n/);
@@ -380,15 +408,25 @@ mota: Thông Tin: TÓC SÓI NẠ DUNG NHAM ÁO ĐẤU SĨ HUYỀN THOẠI QUẦN
             parsedMods = parseModsText(rawModData);
             
             let displayList = parsedMods;
+            
+            // Lọc theo yêu thích nếu đang ở chế độ yêu thích
             if (viewingFavoritesOnly) {
-                displayList = parsedMods.filter(mod => favorites.includes(mod.id));
+                displayList = displayList.filter(mod => favorites.includes(mod.id));
                 document.getElementById('pageTitle').innerText = "❤️ MOD YÊU THÍCH ❤️";
             } else {
                 document.getElementById('pageTitle').innerText = "🔥 MZ TOOL V3 - 500 SKIN 🔥";
             }
 
+            // Lọc theo từ khóa tìm kiếm nếu đang bật thanh tìm kiếm
+            if (searchActive) {
+                const query = document.getElementById('searchInput').value.toLowerCase().trim();
+                if (query !== "") {
+                    displayList = displayList.filter(mod => mod.name.toLowerCase().includes(query) || mod.mota.toLowerCase().includes(query));
+                }
+            }
+
             if (displayList.length === 0) {
-                container.innerHTML = `<p style="text-align:center; color:#94a3b8; margin-top:40px;">Không có bản mod nào trong danh sách này!</p>`;
+                container.innerHTML = `<p style="text-align:center; color:#94a3b8; margin-top:40px;">Không tìm thấy bản mod nào phù hợp!</p>`;
                 return;
             }
 
@@ -435,6 +473,22 @@ mota: Thông Tin: TÓC SÓI NẠ DUNG NHAM ÁO ĐẤU SĨ HUYỀN THOẠI QUẦN
             document.getElementById('sidebarOverlay').classList.toggle('show');
         }
 
+        // Bật/Tắt khung tìm kiếm từ Menu
+        function toggleSearchBox() {
+            toggleSidebar();
+            const searchContainer = document.getElementById('searchContainer');
+            searchActive = !searchActive;
+            
+            if (searchActive) {
+                searchContainer.style.display = 'block';
+                document.getElementById('searchInput').focus();
+            } else {
+                searchContainer.style.display = 'none';
+                document.getElementById('searchInput').value = '';
+                renderModMenu();
+            }
+        }
+
         // Nút 1: Reset Page (Xóa cache reload)
         function resetPageCache() {
             toggleSidebar();
@@ -444,6 +498,9 @@ mota: Thông Tin: TÓC SÓI NẠ DUNG NHAM ÁO ĐẤU SĨ HUYỀN THOẠI QUẦN
         // Nút 2: Xem danh sách yêu thích
         function showFavoritesOnly() {
             viewingFavoritesOnly = true;
+            searchActive = false;
+            document.getElementById('searchContainer').style.display = 'none';
+            document.getElementById('searchInput').value = '';
             toggleSidebar();
             renderModMenu();
         }
@@ -451,6 +508,9 @@ mota: Thông Tin: TÓC SÓI NẠ DUNG NHAM ÁO ĐẤU SĨ HUYỀN THOẠI QUẦN
         // Xem tất cả mod
         function showAllMods() {
             viewingFavoritesOnly = false;
+            searchActive = false;
+            document.getElementById('searchContainer').style.display = 'none';
+            document.getElementById('searchInput').value = '';
             toggleSidebar();
             renderModMenu();
         }
