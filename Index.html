@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mod Menu Pro</title>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+        }
+        h2 {
+            text-align: center;
+            color: #38bdf8;
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+        #mod-list-container {
+            max-height: 85vh;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        #mod-list-container::-webkit-scrollbar {
+            width: 5px;
+        }
+        #mod-list-container::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+        .mod-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            border: 1px solid #334155;
+        }
+        .mod-card img {
+            width: 100%;
+            height: 160px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #0f172a;
+            border: 1px solid #475569;
+            display: block;
+            cursor: pointer; /* Biến chuột thành hình bàn tay khi chỉ vào ảnh */
+            transition: 0.2s;
+        }
+        .mod-card img:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+        .mod-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            gap: 10px;
+        }
+        .mod-info h4 {
+            margin: 0;
+            font-size: 14px;
+            color: #f8fafc;
+            text-align: left;
+        }
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            transition: 0.1s;
+        }
+        .btn-ffth { background: #2563eb; }
+        .btn-ffmax { background: #ea580c; }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
+
+        /* Giao diện bảng thông báo (Modal) khi bấm vào ảnh */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 340px;
+            border: 1px solid #38bdf8;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+        }
+        .modal-content h3 {
+            color: #38bdf8;
+            margin-top: 0;
+            font-size: 16px;
+        }
+        .modal-desc {
+            color: #cbd5e1;
+            font-size: 13px;
+            line-height: 1.5;
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+            white-space: pre-line;
+        }
+        .btn-close {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        .btn-close:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <h2>🔥 MACARA MODZ - MENU 100 SLOTS 🔥</h2>
+    
+    <div id="mod-list-container"></div>
+
+    <!-- Bảng Modal hiển thị mô tả -->
+    <div id="modModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 id="modalTitle">Tiêu đề mod</h3>
+            <div class="modal-desc" id="modalDesc">Nội dung mô tả...</div>
+            <button class="btn-close" onclick="closeModalDirect()">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // CÁCH THÊM MOD (5 DÒNG MỖI MỤC):
+        // 1. Tên mod
+        // 2. ffth: link_zip
+        // 3. ffmax: link_zip
+        // 4. anh: link_anh (hoặc ko)
+        // 5. mota: nội dung mô tả (hoặc ko)
+        // =========================================================================
+        const rawModData = `
+Mod Skin AK47 Rồng Xanh
+ffth: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ak.zip
+ffmax: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_ak.zip
+anh: https://i.imgur.com/placeholder1.png
+mota: - Hiệu ứng rồng bay cực đẹp\n- Đã test 100% không ban\n- Âm thanh và tia lửa độc quyền.
+
+Mod Skin M1014 Dạ Thoa
+ffth: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_m1014.zip
+ffmax: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_m1014.zip
+anh: ko
+mota: Súng bắn lực cực mạnh, hiệu ứng khói tím huyền ảo.
+
+Mod Skin MP40 Bích Vàng
+ffth: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_mp40.zip
+ffmax: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_mp40.zip
+anh: ko
+mota: ko
+        `;
+
+        let parsedMods = [];
+
+        function parseModsText(text) {
+            const blocks = text.trim().split(/\n\s*\n/);
+            const list = [];
+            blocks.forEach(block => {
+                const lines = block.trim().split('\n');
+                if (lines.length >= 4) {
+                    let name = lines[0].trim();
+                    let ffth = lines[1].replace(/^(ffth:|ffth\s*:)/i, '').trim();
+                    let ffmax = lines[2].replace(/^(ffmax:|ffmax\s*:)/i, '').trim();
+                    let anh = lines[3].replace(/^(anh:|anh\s*:)/i, '').trim();
+                    let mota = "Chưa có mô tả cho bản mod này.";
+                    
+                    if (lines.length >= 5) {
+                        let line4 = lines[4].trim();
+                        let cleanedMota = line4.replace(/^(mota:|mota\s*:)/i, '').trim();
+                        if (cleanedMota && cleanedMota.toLowerCase() !== 'ko') {
+                            mota = cleanedMota;
+                        }
+                    }
+                    
+                    if (anh.toLowerCase() === 'ko' || anh === '') {
+                        anh = 'https://via.placeholder.com/600x200?text=Macara+Modz';
+                    }
+                    
+                    list.push({ name, image: anh, linkFFTh: ffth, linkFFMax: ffmax, mota: mota });
+                }
+            });
+            return list;
+        }
+
+        function renderModMenu() {
+            const container = document.getElementById('mod-list-container');
+            parsedMods = parseModsText(rawModData);
+            let htmlContent = '';
+
+            parsedMods.forEach((mod, index) => {
+                htmlContent += `
+                    <div class="mod-card">
+                        <img src="${mod.image}" alt="Banner" onclick="showDesc(${index})" onerror="this.src='https://via.placeholder.com/600x200?text=No+Image'">
+                        <div class="mod-footer">
+                            <div class="mod-info">
+                                <h4>${index + 1}. ${mod.name}</h4>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-ffth" onclick="installMod('${mod.linkFFTh}')">FF Thường</button>
+                                <button class="btn btn-ffmax" onclick="installMod('${mod.linkFFMax}')">FF Max</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlContent;
+        }
+
+        // Mở bảng mô tả khi click vào ảnh
+        function showDesc(index) {
+            const mod = parsedMods[index];
+            if (mod) {
+                document.getElementById('modalTitle').innerText = mod.name;
+                document.getElementById('modalDesc').innerText = mod.mota;
+                document.getElementById('modModal').style.display = 'flex';
+            }
+        }
+
+        function closeModal(event) {
+            document.getElementById('modModal').style.display = 'none';
+        }
+
+        function closeModalDirect() {
+            document.getElementById('modModal').style.display = 'none';
+        }
+
+        function installMod(url) {
+            if (window.AndroidBridge) {
+                AndroidBridge.installModFromHtml(url);
+            } else {
+                alert("Lỗi: Không tìm thấy cầu nối Android Bridge!");
+            }
+        }
+
+        renderModMenu();
+    </script>
+
+</body>
+</html>
