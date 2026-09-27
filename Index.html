@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mod Menu Pro</title>
     <style>
         body {
@@ -11,13 +11,30 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 10px;
+            touch-action: pan-y; /* Chỉ cho phép cuộn dọc */
+        }
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .menu-btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #38bdf8;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
         }
         h2 {
             text-align: center;
             color: #38bdf8;
-            margin-bottom: 15px;
-            font-size: 18px;
+            margin: 0;
+            font-size: 16px;
             text-transform: uppercase;
+            flex-grow: 1;
         }
         #mod-list-container {
             max-height: 85vh;
@@ -38,6 +55,7 @@
             margin-bottom: 15px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             border: 1px solid #334155;
+            position: relative;
         }
         .mod-card img {
             width: 100%;
@@ -47,13 +65,38 @@
             background: #0f172a;
             border: 1px solid #475569;
             display: block;
-            cursor: pointer; /* Biến chuột thành hình bàn tay khi chỉ vào ảnh */
+            cursor: pointer;
             transition: 0.2s;
         }
         .mod-card img:active {
             opacity: 0.8;
             transform: scale(0.98);
         }
+        /* Icon Trái tim góc trên bên phải ảnh */
+        .favorite-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #475569;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #ffffff;
+            transition: 0.2s;
+            user-select: none;
+        }
+        .favorite-icon.active {
+            color: #ec4899; /* Màu hồng khi được thích */
+            border-color: #ec4899;
+            background: rgba(236, 72, 153, 0.2);
+        }
+
         .mod-footer {
             display: flex;
             justify-content: space-between;
@@ -86,11 +129,69 @@
         .btn-ffmax { background: #ea580c; }
         .btn:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* Giao diện bảng thông báo (Modal) khi bấm vào ảnh */
+        /* Sidebar Drawer (Tab nhỏ cạnh trái) */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 220px;
+            height: 100%;
+            background: #0f172a;
+            border-right: 1px solid #334155;
+            z-index: 1000;
+            transition: 0.3s ease-in-out;
+            padding: 20px 10px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+        .sidebar.open {
+            left: 0;
+        }
+        .sidebar h3 {
+            color: #38bdf8;
+            font-size: 15px;
+            margin-top: 0;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .sidebar-btn {
+            display: block;
+            width: 100%;
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #334155;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .sidebar-btn:active {
+            background: #334155;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 995;
+        }
+        .overlay.show {
+            display: block;
+        }
+
+        /* Modal thông báo */
         .modal {
             display: none;
             position: fixed;
-            z-index: 999;
+            z-index: 1100;
             left: 0;
             top: 0;
             width: 100%;
@@ -143,9 +244,22 @@
 </head>
 <body>
 
-    <h2>🔥 MZ TOOL V3 UPDATE - 500 SKIN 🔥</h2>
+    <div class="header-bar">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <h2 id="pageTitle">🔥 MZ TOOL V3 - 500 SKIN 🔥</h2>
+        <div style="width: 32px;"></div> <!-- Cân bằng header -->
+    </div>
     
     <div id="mod-list-container"></div>
+
+    <!-- Thanh Drawer Sidebar bên trái -->
+    <div class="sidebar" id="mySidebar">
+        <h3>Menu Tùy Chọn</h3>
+        <button class="sidebar-btn" onclick="resetPageCache()">🔄 Reset Page (Xóa Cache)</button>
+        <button class="sidebar-btn" onclick="showFavoritesOnly()">❤️ Yêu thích đã lưu</button>
+        <button class="sidebar-btn" onclick="showAllMods()" style="color: #38bdf8;">🏠 Xem Tất Cả Mod</button>
+    </div>
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Bảng Modal hiển thị mô tả -->
     <div id="modModal" class="modal" onclick="closeModal(event)">
@@ -193,11 +307,13 @@ mota: Alien X chế 7D Texture
         `;
 
         let parsedMods = [];
+        let favorites = JSON.parse(localStorage.getItem('mz_favorites')) || [];
+        let viewingFavoritesOnly = false;
 
         function parseModsText(text) {
             const blocks = text.trim().split(/\n\s*\n/);
             const list = [];
-            blocks.forEach(block => {
+            blocks.forEach((block, index) => {
                 const lines = block.trim().split('\n');
                 if (lines.length >= 4) {
                     let name = lines[0].trim();
@@ -218,7 +334,7 @@ mota: Alien X chế 7D Texture
                         anh = 'https://via.placeholder.com/600x200?text=Macara+Modz';
                     }
                     
-                    list.push({ name, image: anh, linkFFTh: ffth, linkFFMax: ffmax, mota: mota });
+                    list.push({ id: index, name, image: anh, linkFFTh: ffth, linkFFMax: ffmax, mota: mota });
                 }
             });
             return list;
@@ -227,12 +343,29 @@ mota: Alien X chế 7D Texture
         function renderModMenu() {
             const container = document.getElementById('mod-list-container');
             parsedMods = parseModsText(rawModData);
-            let htmlContent = '';
+            
+            let displayList = parsedMods;
+            if (viewingFavoritesOnly) {
+                displayList = parsedMods.filter(mod => favorites.includes(mod.id));
+                document.getElementById('pageTitle').innerText = "❤️ MOD YÊU THÍCH ❤️";
+            } else {
+                document.getElementById('pageTitle').innerText = "🔥 MZ TOOL V3 - 500 SKIN 🔥";
+            }
 
-            parsedMods.forEach((mod, index) => {
+            if (displayList.length === 0) {
+                container.innerHTML = `<p style="text-align:center; color:#94a3b8; margin-top:40px;">Không có bản mod nào trong danh sách này!</p>`;
+                return;
+            }
+
+            let htmlContent = '';
+            displayList.forEach((mod, index) => {
+                let isFav = favorites.includes(mod.id);
+                let favClass = isFav ? 'favorite-icon active' : 'favorite-icon';
+                
                 htmlContent += `
                     <div class="mod-card">
-                        <img src="${mod.image}" alt="Banner" onclick="showDesc(${index})" onerror="this.src='https://via.placeholder.com/600x200?text=No+Image'">
+                        <div class="${favClass}" onclick="toggleFavorite(${mod.id})">❤️</div>
+                        <img src="${mod.image}" alt="Banner" onclick="showDesc(${mod.id})" onerror="this.src='https://via.placeholder.com/600x200?text=No+Image'">
                         <div class="mod-footer">
                             <div class="mod-info">
                                 <h4>${index + 1}. ${mod.name}</h4>
@@ -249,9 +382,60 @@ mota: Alien X chế 7D Texture
             container.innerHTML = htmlContent;
         }
 
+        // Toggle Thả tim yêu thích
+        function toggleFavorite(id) {
+            const index = favorites.indexOf(id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.push(id);
+            }
+            localStorage.setItem('mz_favorites', JSON.stringify(favorites));
+            renderModMenu();
+        }
+
+        // Đóng mở Sidebar Drawer từ cạnh trái
+        function toggleSidebar() {
+            document.getElementById('mySidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+
+        // Nút 1: Reset Page (Xóa cache reload)
+        function resetPageCache() {
+            toggleSidebar();
+            window.location.reload(true);
+        }
+
+        // Nút 2: Xem danh sách yêu thích
+        function showFavoritesOnly() {
+            viewingFavoritesOnly = true;
+            toggleSidebar();
+            renderModMenu();
+        }
+
+        // Xem tất cả mod
+        function showAllMods() {
+            viewingFavoritesOnly = false;
+            toggleSidebar();
+            renderModMenu();
+        }
+
+        // Hỗ trợ vuốt từ cạnh trái sang phải để mở menu
+        let touchStartX = 0;
+        window.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        window.addEventListener('touchend', e => {
+            let touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX < 40 && touchEndX - touchStartX > 70) {
+                document.getElementById('mySidebar').classList.add('open');
+                document.getElementById('sidebarOverlay').classList.add('show');
+            }
+        });
+
         // Mở bảng mô tả khi click vào ảnh
-        function showDesc(index) {
-            const mod = parsedMods[index];
+        function showDesc(id) {
+            const mod = parsedMods.find(m => m.id === id);
             if (mod) {
                 document.getElementById('modalTitle').innerText = mod.name;
                 document.getElementById('modalDesc').innerText = mod.mota;
@@ -268,6 +452,10 @@ mota: Alien X chế 7D Texture
         }
 
         function installMod(url) {
+            if (!url || url.trim() === '') {
+                alert("Bản mod này chưa có link tải cho phiên bản này!");
+                return;
+            }
             if (window.AndroidBridge) {
                 AndroidBridge.installModFromHtml(url);
             } else {
