@@ -155,7 +155,7 @@
             position: fixed;
             top: 0;
             left: -250px;
-            width: 220px;
+            width: 230px;
             height: 100%;
             background: #0f172a;
             border-right: 1px solid #334155;
@@ -164,6 +164,7 @@
             padding: 20px 10px;
             box-shadow: 5px 0 15px rgba(0,0,0,0.5);
             box-sizing: border-box;
+            overflow-y: auto;
         }
         .sidebar.open {
             left: 0;
@@ -187,7 +188,7 @@
             text-align: left;
             font-size: 13px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             cursor: pointer;
             transition: 0.2s;
         }
@@ -281,10 +282,14 @@
     <!-- Thanh Drawer Sidebar bên trái -->
     <div class="sidebar" id="mySidebar">
         <h3>Menu Tùy Chọn</h3>
-        <button class="sidebar-btn" onclick="resetPageCache()">🔄 Reset Page (Xóa Cache)</button>
-        <button class="sidebar-btn" onclick="showFavoritesOnly()">❤️ Yêu thích đã lưu</button>
+        <button class="sidebar-btn" onclick="setCategory('all')" style="color: #38bdf8;">🏠 Xem Tất Cả Mod</button>
+        <button class="sidebar-btn" onclick="setCategory('favorites')">❤️ Yêu thích đã lưu</button>
+        <button class="sidebar-btn" onclick="setCategory('alok')">⚔️ Tất Cả Mod Alok</button>
+        <button class="sidebar-btn" onclick="setCategory('ignis')">🔥 Tất Cả Mod Ignis</button>
+        <button class="sidebar-btn" onclick="setCategory('gun')">🔫 Tất Cả Mod Súng</button>
+        <button class="sidebar-btn" onclick="setCategory('other')">📦 Tất Cả Mod Khác</button>
         <button class="sidebar-btn" onclick="toggleSearchBox()">🔍 Tìm Kiếm Mod</button>
-        <button class="sidebar-btn" onclick="showAllMods()" style="color: #38bdf8;">🏠 Xem Tất Cả Mod</button>
+        <button class="sidebar-btn" onclick="resetPageCache()">🔄 Reset Page (Xóa Cache)</button>
     </div>
     <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
@@ -419,7 +424,7 @@ MOD SET HẮC TINH IGNIS NGẦU PROPLAYER
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/items_mz_tool_51468139.zip
 FFMAX: 
 ANH: https://lh3.googleusercontent.com/d/14EBbzwgQPXTljJZPrnppSNS2mP2Wd6Zk
-MOTA: TÓC VÀ ÁO HẮC TINH VỚI NẤM ĐẤM HẮC ẢNH NGẦU BÁ CHÁY
+MOTA: TÓC V ÁO HẮC TINH VỚI NẤM ĐẤM HẮC ẢNH NGẦU BÁ CHÁY
 
 MOD SKIN ALOK ÁO SASUKE QUẦN STREES NGẦU BÁ CHÁY
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_e1vfyz.zip
@@ -486,13 +491,20 @@ MOD SKIN ÁO ĐÁ BANH HỒNG QUẦN NGỦ
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_ld8knc.zip
 FFMAX: 
 ANH: https://lh3.googleusercontent.com/d/1rD7PTSvo85o75kvkNk9CNg1kUTB7buAu
-MOTA: MOD SKIN ÁO ĐÁ BANH HỒNG QUẦN NGỦ
+MOTA: MOD SKIN ÁO ĐÁ BANH HỒNG QUẦN NGỦ ALOK
         `;
 
         let parsedMods = [];
         let favorites = JSON.parse(localStorage.getItem('mz_favorites')) || [];
-        let viewingFavoritesOnly = false;
+        let currentCategory = 'all'; // 'all', 'favorites', 'alok', 'ignis', 'gun', 'other'
         let searchActive = false;
+
+        // Danh sách từ khóa nhận diện súng
+        const gunKeywords = [
+            'súng', 'm1887', 'mp40', 'ump', 'ak', 'scar', 'xm8', 'parafal', 
+            'mp5', 'groza', 'm1014', 'm590', 'm4a1', 'thompson', 'vector', 
+            'p90', 'awm', 'barrett', 'm249', 'kar98k', 'ac80', 'chim gõ', 'minuzi'
+        ];
 
         function parseModsText(text) {
             const blocks = text.trim().split(/\n\s*\n/);
@@ -510,8 +522,8 @@ MOTA: MOD SKIN ÁO ĐÁ BANH HỒNG QUẦN NGỦ
                         let line4 = lines[4].trim();
                         let cleanedMota = line4.replace(/^(mota:|mota\s*:)/i, '').trim();
                         if (cleanedMota && cleanedMota.toLowerCase() !== 'ko') {
-    mota = cleanedMota + " - ｍｚｔｏｏｌ";
-}
+                            mota = cleanedMota + " - ｍｚｔｏｏլ";
+                        }
                     }
                     
                     if (anh.toLowerCase() === 'ko' || anh === '') {
@@ -524,16 +536,39 @@ MOTA: MOD SKIN ÁO ĐÁ BANH HỒNG QUẦN NGỦ
             return list;
         }
 
+        // Kiểm tra điều kiện lọc theo danh mục
+        function matchesCategory(mod) {
+            const contentText = (mod.name + " " + mod.mota).toLowerCase();
+            const hasAlok = contentText.includes('alok');
+            const hasIgnis = contentText.includes('ignis');
+            const hasGun = gunKeywords.some(keyword => contentText.includes(keyword));
+
+            if (currentCategory === 'all') return true;
+            if (currentCategory === 'favorites') return favorites.includes(mod.id);
+            if (currentCategory === 'alok') return hasAlok;
+            if (currentCategory === 'ignis') return hasIgnis;
+            if (currentCategory === 'gun') return hasGun;
+            if (currentCategory === 'other') return !hasAlok && !hasIgnis && !hasGun;
+            return true;
+        }
+
         function renderModMenu() {
             const container = document.getElementById('mod-list-container');
             parsedMods = parseModsText(rawModData);
             
-            let displayList = parsedMods;
+            let displayList = parsedMods.filter(mod => matchesCategory(mod));
             
-            // Lọc theo yêu thích nếu đang ở chế độ yêu thích
-            if (viewingFavoritesOnly) {
-                displayList = displayList.filter(mod => favorites.includes(mod.id));
+            // Cập nhật tiêu đề trang tương ứng
+            if (currentCategory === 'favorites') {
                 document.getElementById('pageTitle').innerText = "❤️ MOD YÊU THÍCH ❤️";
+            } else if (currentCategory === 'alok') {
+                document.getElementById('pageTitle').innerText = "⚔️ TẤT CẢ MOD ALOK ⚔️";
+            } else if (currentCategory === 'ignis') {
+                document.getElementById('pageTitle').innerText = "🔥 TẤT CẢ MOD IGNIS 🔥";
+            } else if (currentCategory === 'gun') {
+                document.getElementById('pageTitle').innerText = "🔫 TẤT CẢ MOD SÚNG 🔫";
+            } else if (currentCategory === 'other') {
+                document.getElementById('pageTitle').innerText = "📦 TẤT CẢ MOD KHÁC 📦";
             } else {
                 document.getElementById('pageTitle').innerText = "🔥 MZ TOOL V3 - 500 SKIN 🔥";
             }
@@ -594,6 +629,16 @@ MOTA: MOD SKIN ÁO ĐÁ BANH HỒNG QUẦN NGỦ
             document.getElementById('sidebarOverlay').classList.toggle('show');
         }
 
+        // Đặt danh mục hiển thị và đóng sidebar
+        function setCategory(category) {
+            currentCategory = category;
+            searchActive = false;
+            document.getElementById('searchContainer').style.display = 'none';
+            document.getElementById('searchInput').value = '';
+            toggleSidebar();
+            renderModMenu();
+        }
+
         // Bật/Tắt khung tìm kiếm từ Menu
         function toggleSearchBox() {
             toggleSidebar();
@@ -610,30 +655,10 @@ MOTA: MOD SKIN ÁO ĐÁ BANH HỒNG QUẦN NGỦ
             }
         }
 
-        // Nút 1: Reset Page (Xóa cache reload)
+        // Reset Page (Xóa cache reload)
         function resetPageCache() {
             toggleSidebar();
             window.location.reload(true);
-        }
-
-        // Nút 2: Xem danh sách yêu thích
-        function showFavoritesOnly() {
-            viewingFavoritesOnly = true;
-            searchActive = false;
-            document.getElementById('searchContainer').style.display = 'none';
-            document.getElementById('searchInput').value = '';
-            toggleSidebar();
-            renderModMenu();
-        }
-
-        // Xem tất cả mod
-        function showAllMods() {
-            viewingFavoritesOnly = false;
-            searchActive = false;
-            document.getElementById('searchContainer').style.display = 'none';
-            document.getElementById('searchInput').value = '';
-            toggleSidebar();
-            renderModMenu();
         }
 
         // Hỗ trợ vuốt từ cạnh trái sang phải để mở menu
