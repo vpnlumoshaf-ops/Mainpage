@@ -167,7 +167,6 @@
             z-index: 1000;
             transition: 0.3s ease-in-out;
             padding: 20px 10px;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
             box-sizing: border-box;
             overflow-y: auto;
         }
@@ -214,7 +213,7 @@
             display: block;
         }
 
-        /* Modal thông báo */
+        /* Modal thông báo / Hộp thoại lựa chọn gỡ mod */
         .modal {
             display: none;
             position: fixed;
@@ -267,6 +266,25 @@
             font-size: 13px;
         }
         .btn-close:active { transform: scale(0.95); }
+        .modal-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .modal-action-btn {
+            width: 100%;
+            padding: 10px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            font-size: 13px;
+        }
+        .btn-blue { background: #2563eb; }
+        .btn-orange { background: #ea580c; }
+        .btn-gray { background: #475569; }
     </style>
 </head>
 <body>
@@ -293,17 +311,20 @@
         <button class="sidebar-btn" onclick="setCategory('ignis')">🔥 Tất Cả Mod Ignis</button>
         <button class="sidebar-btn" onclick="setCategory('gun')">🔫 Tất Cả Mod Súng</button>
         <button class="sidebar-btn" onclick="setCategory('other')">📦 Tất Cả Mod Khác</button>
+        <button class="sidebar-btn" onclick="openRemoveModMenu()" style="color: #ef4444;">🗑️ Xóa Mod (Gốc)</button>
         <button class="sidebar-btn" onclick="toggleSearchBox()">🔍 Tìm Kiếm Mod</button>
         <button class="sidebar-btn" onclick="resetPageCache()">🔄 Reset Page (Xóa Cache)</button>
     </div>
     <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- Bảng Modal hiển thị mô tả -->
+    <!-- Bảng Modal hiển thị mô tả hoặc xóa mod -->
     <div id="modModal" class="modal" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3 id="modalTitle">Tiêu đề mod</h3>
-            <div class="modal-desc" id="modalDesc">Nội dung mô tả...</div>
-            <button class="btn-close" onclick="closeModalDirect()">Đóng</button>
+            <div id="modalBodyContent">
+                <div class="modal-desc" id="modalDesc">Nội dung mô tả...</div>
+                <button class="btn-close" onclick="closeModalDirect()">Đóng</button>
+            </div>
         </div>
     </div>
 
@@ -680,15 +701,6 @@ FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ite
 FFMAX: 
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791196982.jpg
 MOTA: MOD ALOK THỎ ĐỘT BIẾN ĐỎ KÈM HĐ FAMAS LV 7
-
-        
-
-        
-        
-        
-
-        
-        
         `;
 
         let parsedMods = [];
@@ -876,9 +888,50 @@ MOTA: MOD ALOK THỎ ĐỘT BIẾN ĐỎ KÈM HĐ FAMAS LV 7
             const mod = parsedMods.find(m => m.id === id);
             if (mod) {
                 document.getElementById('modalTitle').innerText = mod.name;
-                document.getElementById('modalDesc').innerText = mod.mota;
+                document.getElementById('modalBodyContent').innerHTML = `
+                    <div class="modal-desc" id="modalDesc">${mod.mota}</div>
+                    <button class="btn-close" onclick="closeModalDirect()">Đóng</button>
+                `;
                 document.getElementById('modModal').style.display = 'flex';
             }
+        }
+
+        // Mở Menu Gốc / Xóa Mod
+        function openRemoveModMenu() {
+            toggleSidebar();
+            document.getElementById('modalTitle').innerText = "🗑️ CHỌN LOẠI CẦN XÓA MOD";
+            document.getElementById('modalBodyContent').innerHTML = `
+                <div class="modal-btn-group">
+                    <button class="modal-action-btn btn-blue" onclick="openRemoveCharacterMenu()">👤 Xóa Mod Nhân Vật</button>
+                    <button class="modal-action-btn btn-orange" onclick="alert('Tính năng xóa Súng sẽ cập nhật sau!')">🔫 Xóa Mod Súng (Sắp ra mắt)</button>
+                    <button class="modal-action-btn btn-gray" onclick="closeModalDirect()">Đóng</button>
+                </div>
+            `;
+            document.getElementById('modModal').style.display = 'flex';
+        }
+
+        // Menu con: Chọn nhân vật (Alok / Ignis)
+        function openRemoveCharacterMenu() {
+            document.getElementById('modalTitle').innerText = "👤 XÓA MOD NHÂN VẬT";
+            document.getElementById('modalBodyContent').innerHTML = `
+                <div class="modal-btn-group">
+                    <button class="modal-action-btn btn-blue" onclick="openRemoveAlokVersionMenu()">⚔️ Nhân Vật Alok</button>
+                    <button class="modal-action-btn btn-orange" onclick="alert('Tính năng xóa Ignis sẽ làm sau!')">🔥 Nhân Vật Ignis (Sắp ra mắt)</button>
+                    <button class="modal-action-btn btn-gray" onclick="openRemoveModMenu()">Quay Lại</button>
+                </div>
+            `;
+        }
+
+        // Menu con: Chọn phiên bản Alok (FF Thường / FF Max)
+        function openRemoveAlokVersionMenu() {
+            document.getElementById('modalTitle').innerText = "⚔️ XÓA MOD ALOK";
+            document.getElementById('modalBodyContent').innerHTML = `
+                <div class="modal-btn-group">
+                    <button class="modal-action-btn btn-blue" onclick="installMod('https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_n1fp8a.zip'); closeModalDirect();">💙 Xóa Alok - FF Thường</button>
+                    <button class="modal-action-btn btn-orange" onclick="installMod('https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_88yc31.zip'); closeModalDirect();">🧡 Xóa Alok - FF Max</button>
+                    <button class="modal-action-btn btn-gray" onclick="openRemoveCharacterMenu()">Quay Lại</button>
+                </div>
+            `;
         }
 
         function closeModal(event) {
@@ -906,5 +959,3 @@ MOTA: MOD ALOK THỎ ĐỘT BIẾN ĐỎ KÈM HĐ FAMAS LV 7
 
 </body>
 </html>
-
-
