@@ -8,21 +8,33 @@
         /* Tắt hoàn toàn hiệu ứng vệt xanh/xám khi chạm trên WebView */
         * {
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
 
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
             background-color: #0b0f19;
             color: #ffffff;
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-            touch-action: pan-y; /* Chỉ cho phép cuộn dọc */
+            overflow: hidden; /* Cố định màn hình, ngăn body cuộn toàn trang */
         }
+
+        /* Khung bao bọc toàn ứng dụng dạng Flexbox cố định màn hình */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 10px;
+        }
+
         .header-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            flex-shrink: 0; /* Không bị co lại */
         }
         .menu-btn {
             background: #1e293b;
@@ -42,10 +54,54 @@
             flex-grow: 1;
         }
         
+        /* Thanh nút lọc nhanh vuốt ngang (Cố định ở trên) */
+        .filter-bar-container {
+            margin-bottom: 10px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .filter-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 4px 2px 6px 2px;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x; /* Chỉ cho phép vuốt ngang, chặn trôi dọc */
+        }
+        .filter-scroll::-webkit-scrollbar {
+            height: 3px;
+        }
+        .filter-scroll::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+        .filter-chip {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+        .filter-chip.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #38bdf8;
+        }
+        .filter-chip:active {
+            transform: scale(0.95);
+        }
+
         /* Khung thanh tìm kiếm ẩn mặc định */
         .search-container {
             display: none;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
         .search-input {
             width: 100%;
@@ -55,17 +111,18 @@
             color: #ffffff;
             border-radius: 8px;
             font-size: 14px;
-            box-sizing: border-box;
             outline: none;
         }
         .search-input:focus {
             border-color: #38bdf8;
         }
 
+        /* Khu vực danh sách mod độc lập, chỉ cuộn dọc phần này */
         #mod-list-container {
-            max-height: 85vh;
+            flex: 1;
             overflow-y: auto;
             padding-right: 4px;
+            -webkit-overflow-scrolling: touch;
         }
         #mod-list-container::-webkit-scrollbar {
             width: 5px;
@@ -289,28 +346,43 @@
 </head>
 <body>
 
-    <div class="header-bar">
-        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-        <h2 id="pageTitle">🔥 MZ TOOL V3 - 500 SKIN 🔥</h2>
-        <div style="width: 32px;"></div> <!-- Cân bằng header -->
-    </div>
-    
-    <!-- Thanh tìm kiếm (Mặc định ẩn) -->
-    <div class="search-container" id="searchContainer">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Nhập tên mod cần tìm..." oninput="renderModMenu()">
-    </div>
+    <div class="app-container">
+        <div class="header-bar">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h2 id="pageTitle">🔥 MZ TOOL V3 - 500 SKIN 🔥</h2>
+            <div style="width: 32px;"></div> <!-- Cân bằng header -->
+        </div>
+        
+        <!-- Thanh nút lọc nhanh vuốt ngang (Cố định) -->
+        <div class="filter-bar-container">
+            <div class="filter-scroll" id="filterScroll">
+                <button class="filter-chip active" onclick="setCategoryFilter('all', this)">🏠 Tất Cả</button>
+                <button class="filter-chip" onclick="setCategoryFilter('favorites', this)">❤️ Yêu Thích</button>
+                <button class="filter-chip" onclick="setCategoryFilter('character', this)">👤 Mod Nhân Vật</button>
+                <button class="filter-chip" onclick="setCategoryFilter('gun', this)">🔫 Mod Súng</button>
+                <button class="filter-chip" onclick="setCategoryFilter('anime', this)">⚡ Mod Anime</button>
+                <button class="filter-chip" onclick="setCategoryFilter('other', this)">📦 Mod Khác</button>
+            </div>
+        </div>
 
-    <div id="mod-list-container"></div>
+        <!-- Thanh tìm kiếm (Cố định khi bật) -->
+        <div class="search-container" id="searchContainer">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Nhập tên mod cần tìm..." oninput="renderModMenu()">
+        </div>
+
+        <!-- Danh sách mod cuộn dọc độc lập -->
+        <div id="mod-list-container"></div>
+    </div>
 
     <!-- Thanh Drawer Sidebar bên trái -->
     <div class="sidebar" id="mySidebar">
         <h3>Menu Tùy Chọn</h3>
-        <button class="sidebar-btn" onclick="setCategory('all')" style="color: #38bdf8;">🏠 Xem Tất Cả Mod</button>
-        <button class="sidebar-btn" onclick="setCategory('favorites')">❤️ Yêu thích đã lưu</button>
-        <button class="sidebar-btn" onclick="setCategory('alok')">⚔️ Tất Cả Mod Alok</button>
-        <button class="sidebar-btn" onclick="setCategory('ignis')">🔥 Tất Cả Mod Ignis</button>
-        <button class="sidebar-btn" onclick="setCategory('gun')">🔫 Tất Cả Mod Súng</button>
-        <button class="sidebar-btn" onclick="setCategory('other')">📦 Tất Cả Mod Khác</button>
+        <button class="sidebar-btn" onclick="setCategoryFilter('all', null); toggleSidebar();" style="color: #38bdf8;">🏠 Xem Tất Cả Mod</button>
+        <button class="sidebar-btn" onclick="setCategoryFilter('favorites', null); toggleSidebar();">❤️ Yêu thích đã lưu</button>
+        <button class="sidebar-btn" onclick="setCategoryFilter('character', null); toggleSidebar();">👤 Tất Cả Mod Nhân Vật</button>
+        <button class="sidebar-btn" onclick="setCategoryFilter('gun', null); toggleSidebar();">🔫 Tất Cả Mod Súng</button>
+        <button class="sidebar-btn" onclick="setCategoryFilter('anime', null); toggleSidebar();">⚡ Tất Cả Mod Anime</button>
+        <button class="sidebar-btn" onclick="setCategoryFilter('other', null); toggleSidebar();">📦 Tất Cả Mod Khác</button>
         <button class="sidebar-btn" onclick="openRemoveModMenu()" style="color: #ef4444;">🗑️ Xóa Mod (Gốc)</button>
         <button class="sidebar-btn" onclick="toggleSearchBox()">🔍 Tìm Kiếm Mod</button>
         <button class="sidebar-btn" onclick="resetPageCache()">🔄 Reset Page (Xóa Cache)</button>
@@ -393,9 +465,9 @@ anh: https://lh3.googleusercontent.com/d/1ITOLEg2aogwPlLXADEMKSqUrk1TiyTml
 mota: Vú to , GÓI HỌA NỮ
 
 MOD SKIN IGNIS VIP
-ffth: https://github.com/vpnlumoshaf-ops/Anhskin1/raw/refs/heads/main/ffth_ao_dau_si.zip
-ffmax: https://github.com/vpnlumoshaf-ops/Anhskin1/raw/refs/heads/main/ffmax_ao_dau_si.zip
-anh: https://github.com/vpnlumoshaf-ops/Anhskin1/raw/refs/heads/main/Screenshot_20260901-084924_YouTube.jpg
+ffth: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/ffth_ao_dau_si.zip
+ffmax: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/ffmax_ao_dau_si.zip
+anh: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/Screenshot_20260901-084924_YouTube.jpg
 mota: Thông Tin: TÓC SÓI NẠ DUNG NHAM ÁO ĐẤU SĨ HUYỀN THOẠI QUẦN VBTT CHÂN ĐẤT NẤM ĐẤM NHẤT QUYỀN
 
 MOD SKIN IGNIS VIP 
@@ -635,7 +707,7 @@ MOD SKIN ALOK QUÁI NHÂN HƯ KHÔNG - CÓ FF VÀ FFMAX
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_v316bh.zip
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_zmumi6.zip
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1790952125.jpg
-MOTA: ALOK FULL SET QUÁI NHAN HƯ KHÔNG, ĐỦ 2 PHIÊN BẢN
+MOTA: ALOK FULL SET QUÁI NHÂN HƯ KHÔNG, ĐỦ 2 PHIÊN BẢN
 
 MOD SKIN ALOK ÁO 3 LỖ TRẮNG KÈM HĐ M1887 LV 7
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_tjhrih.zip
@@ -713,20 +785,24 @@ FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ign
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_ignis_mz_o9l1w9.zip
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791289725.jpg
 MOTA: LUFFY NIKA IGNIS ANIME
-
-
         `;
 
         let parsedMods = [];
         let favorites = JSON.parse(localStorage.getItem('mz_favorites')) || [];
-        let currentCategory = 'all'; // 'all', 'favorites', 'alok', 'ignis', 'gun', 'other'
+        let currentCategory = 'all'; // 'all', 'favorites', 'character', 'gun', 'anime', 'other'
         let searchActive = false;
 
-        // Danh sách từ khóa nhận diện súng
+        // Bộ từ khóa phân loại nhận diện chuẩn xác
+        const characterKeywords = ['ignis', 'alok', 'ray', 'oscar', 'tatsuya', 'kapella', 'wolfrahh', 'alienx', 'nhân vật'];
         const gunKeywords = [
-            'súng', 'm1887', 'mp40', 'ump', 'ak', 'scar', 'xm8', 'parafal', 
-            'mp5', 'groza', 'm1014', 'm590', 'm4a1', 'thompson', 'vector', 
-            'p90', 'awm', 'barrett', 'm249', 'kar98k', 'ac80', 'chim gõ', 'minuzi'
+            'súng', 'm1887', 'mp40', 'mp5', 'ump', 'ac80', 'thomson', 'thompson', 
+            'ak47', 'ak', 'scar', 'xm8', 'awm', 'chim gõ', 'm1014', 'm590', 'm4a1', 
+            'vector', 'p90', 'barrett', 'm249', 'kar98k', 'aug', 'g18', 'usp', 'de', 'lục bạc', 'famas'
+        ];
+        const animeKeywords = [
+            'nakroth', 'thứ nguyên vệ thần', 'madara', 'itachi', 'sasuke', 'naruto', 
+            'goku', 'luffy', 'nika', 'kaito kid', 'megumi', 'minato', 'bluelock', 'blue lock', 
+            'chidori', 'hỏa quyền', 'kakashi', 'tanjiro', 'zoro', 'saitama', 'nezuko', 'boruto', 'anime'
         ];
 
         function parseModsText(text) {
@@ -759,19 +835,20 @@ MOTA: LUFFY NIKA IGNIS ANIME
             return list;
         }
 
-        // Kiểm tra điều kiện lọc theo danh mục
+        // Lọc từ khóa từ cả tên và mô tả (không phân biệt chữ hoa/thường)
         function matchesCategory(mod) {
             const contentText = (mod.name + " " + mod.mota).toLowerCase();
-            const hasAlok = contentText.includes('alok');
-            const hasIgnis = contentText.includes('ignis');
-            const hasGun = gunKeywords.some(keyword => contentText.includes(keyword));
+            
+            const isCharacter = characterKeywords.some(keyword => contentText.includes(keyword));
+            const isGun = gunKeywords.some(keyword => contentText.includes(keyword));
+            const isAnime = animeKeywords.some(keyword => contentText.includes(keyword));
 
             if (currentCategory === 'all') return true;
             if (currentCategory === 'favorites') return favorites.includes(mod.id);
-            if (currentCategory === 'alok') return hasAlok;
-            if (currentCategory === 'ignis') return hasIgnis;
-            if (currentCategory === 'gun') return hasGun;
-            if (currentCategory === 'other') return !hasAlok && !hasIgnis && !hasGun;
+            if (currentCategory === 'character') return isCharacter;
+            if (currentCategory === 'gun') return isGun;
+            if (currentCategory === 'anime') return isAnime;
+            if (currentCategory === 'other') return !isCharacter && !isGun && !isAnime;
             return true;
         }
 
@@ -784,14 +861,14 @@ MOTA: LUFFY NIKA IGNIS ANIME
             // Cập nhật tiêu đề trang tương ứng
             if (currentCategory === 'favorites') {
                 document.getElementById('pageTitle').innerText = "❤️ MOD YÊU THÍCH ❤️";
-            } else if (currentCategory === 'alok') {
-                document.getElementById('pageTitle').innerText = "⚔️ TẤT CẢ MOD ALOK ⚔️";
-            } else if (currentCategory === 'ignis') {
-                document.getElementById('pageTitle').innerText = "🔥 TẤT CẢ MOD IGNIS 🔥";
+            } else if (currentCategory === 'character') {
+                document.getElementById('pageTitle').innerText = "👤 MOD NHÂN VẬT 👤";
             } else if (currentCategory === 'gun') {
-                document.getElementById('pageTitle').innerText = "🔫 TẤT CẢ MOD SÚNG 🔫";
+                document.getElementById('pageTitle').innerText = "🔫 MOD SÚNG 🔫";
+            } else if (currentCategory === 'anime') {
+                document.getElementById('pageTitle').innerText = "⚡ MOD ANIME ⚡";
             } else if (currentCategory === 'other') {
-                document.getElementById('pageTitle').innerText = "📦 TẤT CẢ MOD KHÁC 📦";
+                document.getElementById('pageTitle').innerText = "📦 MOD KHÁC 📦";
             } else {
                 document.getElementById('pageTitle').innerText = "🔥 MZ TOOL V3 - 500 SKIN 🔥";
             }
@@ -852,13 +929,21 @@ MOTA: LUFFY NIKA IGNIS ANIME
             document.getElementById('sidebarOverlay').classList.toggle('show');
         }
 
-        // Đặt danh mục hiển thị và đóng sidebar
-        function setCategory(category) {
+        // Đặt danh mục hiển thị từ thanh cuộn ngang hoặc sidebar
+        function setCategoryFilter(category, btnElement) {
             currentCategory = category;
             searchActive = false;
             document.getElementById('searchContainer').style.display = 'none';
             document.getElementById('searchInput').value = '';
-            toggleSidebar();
+            
+            // Cập nhật trạng thái active trên các nút chip vuốt ngang nếu có truyền vào
+            if (btnElement) {
+                document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+                btnElement.classList.add('active');
+            } else {
+                document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            }
+            
             renderModMenu();
         }
 
