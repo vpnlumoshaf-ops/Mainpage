@@ -342,6 +342,83 @@
         .btn-blue { background: #2563eb; }
         .btn-orange { background: #ea580c; }
         .btn-gray { background: #475569; }
+
+        /* ==============================================================
+           CUSTOM RGB TOAST CỦA BẠN 
+           ============================================================== */
+        #customToastContainer {
+            position: fixed;
+            top: -120px; /* Ẩn đi mặc định */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 350px;
+            transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Hiệu ứng nảy mượt */
+        }
+        
+        /* Hiệu ứng viền RGB */
+        .rgb-toast-box {
+            position: relative;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+        }
+        
+        .rgb-toast-box::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400%;
+            z-index: -1;
+            border-radius: 14px;
+            animation: glowingRGB 10s linear infinite;
+        }
+
+        @keyframes glowingRGB {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        .toast-title {
+            color: #f8fafc;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .toast-percent {
+            font-size: 24px;
+            font-weight: bold;
+            color: #38bdf8;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            margin: 5px 0;
+            transition: color 0.3s;
+        }
+
+        .toast-progress-bg {
+            width: 100%;
+            height: 6px;
+            background: #0f172a;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .toast-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #38bdf8, #2563eb);
+            border-radius: 10px;
+            transition: width 0.2s linear;
+        }
     </style>
 </head>
 <body>
@@ -402,14 +479,22 @@
         </div>
     </div>
 
+    <!-- ==============================================
+         UI TOAST RGB HIỂN THỊ TRẠNG THÁI TẢI
+         ============================================== -->
+    <div id="customToastContainer">
+        <div class="rgb-toast-box">
+            <div class="toast-title" id="toastTitle">Đang tải: Mod Tên...</div>
+            <div class="toast-percent" id="toastPercent">0%</div>
+            <div class="toast-progress-bg">
+                <div class="toast-progress-bar" id="toastProgressBar"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // =========================================================================
-        // CÁCH THÊM MOD (5 DÒNG MỖI MỤC):
-        // 1. Tên mod
-        // 2. ffth: link_zip
-        // 3. ffmax: link_zip
-        // 4. anh: link_anh (hoặc ko)
-        // 5. mota: nội dung mô tả (hoặc ko)
+        // DATA NGUỒN MOD
         // =========================================================================
         const rawModData = `
 Mod Skywing Cữu vĩ / Bích Long Thần v1
@@ -864,15 +949,13 @@ FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ign
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_ignis_mz_zykq7b.zip
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791295226.jpg
 MOTA: nakroth thứ nguyên vệ thần IGNIS
-
         `;
 
         let parsedMods = [];
         let favorites = JSON.parse(localStorage.getItem('mz_favorites')) || [];
-        let currentCategory = 'all'; // 'all', 'favorites', 'character', 'gun', 'anime', 'single', 'other'
+        let currentCategory = 'all';
         let searchActive = false;
 
-        // Bộ từ khóa phân loại nhận diện chuẩn xác
         const characterKeywords = ['ignis', 'alok', 'ray', 'oscar', 'tatsuya', 'kapella', 'wolfrahh', 'alienx', 'nhân vật'];
         const gunKeywords = [
             'súng', 'm1887', 'mp40', 'mp5', 'ump', 'ac80', 'thomson', 'thompson', 
@@ -916,7 +999,6 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             return list;
         }
 
-        // Lọc từ khóa từ cả tên và mô tả (không phân biệt chữ hoa/thường)
         function matchesCategory(mod) {
             const contentText = (mod.name + " " + mod.mota).toLowerCase();
             
@@ -941,24 +1023,14 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             
             let displayList = parsedMods.filter(mod => matchesCategory(mod));
             
-            // Cập nhật tiêu đề trang tương ứng
-            if (currentCategory === 'favorites') {
-                document.getElementById('pageTitle').innerText = "❤️ MOD YÊU THÍCH ❤️";
-            } else if (currentCategory === 'character') {
-                document.getElementById('pageTitle').innerText = "👤 MOD NHÂN VẬT 👤";
-            } else if (currentCategory === 'gun') {
-                document.getElementById('pageTitle').innerText = "🔫 MOD SÚNG 🔫";
-            } else if (currentCategory === 'anime') {
-                document.getElementById('pageTitle').innerText = "⚡ MOD ANIME ⚡";
-            } else if (currentCategory === 'single') {
-                document.getElementById('pageTitle').innerText = "🎭 MOD LẺ 🎭";
-            } else if (currentCategory === 'other') {
-                document.getElementById('pageTitle').innerText = "📦 MOD KHÁC 📦";
-            } else {
-                document.getElementById('pageTitle').innerText = "🔥 MZ TOOL V3 - 500 SKIN 🔥";
-            }
+            if (currentCategory === 'favorites') document.getElementById('pageTitle').innerText = "❤️ MOD YÊU THÍCH ❤️";
+            else if (currentCategory === 'character') document.getElementById('pageTitle').innerText = "👤 MOD NHÂN VẬT 👤";
+            else if (currentCategory === 'gun') document.getElementById('pageTitle').innerText = "🔫 MOD SÚNG 🔫";
+            else if (currentCategory === 'anime') document.getElementById('pageTitle').innerText = "⚡ MOD ANIME ⚡";
+            else if (currentCategory === 'single') document.getElementById('pageTitle').innerText = "🎭 MOD LẺ 🎭";
+            else if (currentCategory === 'other') document.getElementById('pageTitle').innerText = "📦 MOD KHÁC 📦";
+            else document.getElementById('pageTitle').innerText = "🔥 MZ TOOL V3 - 500 SKIN 🔥";
 
-            // Lọc theo từ khóa tìm kiếm nếu đang bật thanh tìm kiếm
             if (searchActive) {
                 const query = document.getElementById('searchInput').value.toLowerCase().trim();
                 if (query !== "") {
@@ -976,6 +1048,9 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
                 let isFav = favorites.includes(mod.id);
                 let favClass = isFav ? 'favorite-icon active' : 'favorite-icon';
                 
+                // Encode nháy đơn tránh lỗi JS
+                let safeName = mod.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
                 htmlContent += `
                     <div class="mod-card">
                         <div class="${favClass}" onclick="toggleFavorite(${mod.id})">❤️</div>
@@ -985,8 +1060,8 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
                                 <h4>${index + 1}. ${mod.name}</h4>
                             </div>
                             <div class="btn-group">
-                                <button class="btn btn-ffth" onclick="installMod('${mod.linkFFTh}')">FF Thường</button>
-                                <button class="btn btn-ffmax" onclick="installMod('${mod.linkFFMax}')">FF Max</button>
+                                <button class="btn btn-ffth" onclick="installMod('${mod.linkFFTh}', '${safeName}', 'FF Thường')">FF Thường</button>
+                                <button class="btn btn-ffmax" onclick="installMod('${mod.linkFFMax}', '${safeName}', 'FF Max')">FF Max</button>
                             </div>
                         </div>
                     </div>
@@ -996,43 +1071,34 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             container.innerHTML = htmlContent;
         }
 
-        // Toggle Thả tim yêu thích
         function toggleFavorite(id) {
             const index = favorites.indexOf(id);
-            if (index > -1) {
-                favorites.splice(index, 1);
-            } else {
-                favorites.push(id);
-            }
+            if (index > -1) favorites.splice(index, 1);
+            else favorites.push(id);
             localStorage.setItem('mz_favorites', JSON.stringify(favorites));
             renderModMenu();
         }
 
-        // Đóng mở Sidebar Drawer từ cạnh trái
         function toggleSidebar() {
             document.getElementById('mySidebar').classList.toggle('open');
             document.getElementById('sidebarOverlay').classList.toggle('show');
         }
 
-        // Đặt danh mục hiển thị từ thanh cuộn ngang hoặc sidebar
         function setCategoryFilter(category, btnElement) {
             currentCategory = category;
             searchActive = false;
             document.getElementById('searchContainer').style.display = 'none';
             document.getElementById('searchInput').value = '';
             
-            // Cập nhật trạng thái active trên các nút chip vuốt ngang nếu có truyền vào
             if (btnElement) {
                 document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
                 btnElement.classList.add('active');
             } else {
                 document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
             }
-            
             renderModMenu();
         }
 
-        // Bật/Tắt khung tìm kiếm từ Menu
         function toggleSearchBox() {
             toggleSidebar();
             const searchContainer = document.getElementById('searchContainer');
@@ -1048,26 +1114,11 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             }
         }
 
-        // Reset Page (Xóa cache reload)
         function resetPageCache() {
             toggleSidebar();
             window.location.reload(true);
         }
 
-        // Hỗ trợ vuốt từ cạnh trái sang phải để mở menu
-        let touchStartX = 0;
-        window.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        });
-        window.addEventListener('touchend', e => {
-            let touchEndX = e.changedTouches[0].screenX;
-            if (touchStartX < 40 && touchEndX - touchStartX > 70) {
-                document.getElementById('mySidebar').classList.add('open');
-                document.getElementById('sidebarOverlay').classList.add('show');
-            }
-        });
-
-        // Mở bảng mô tả khi click vào ảnh
         function showDesc(id) {
             const mod = parsedMods.find(m => m.id === id);
             if (mod) {
@@ -1080,7 +1131,6 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             }
         }
 
-        // Mở Menu Gốc / Xóa Mod
         function openRemoveModMenu() {
             toggleSidebar();
             document.getElementById('modalTitle').innerText = "🗑️ CHỌN LOẠI CẦN XÓA MOD";
@@ -1094,7 +1144,6 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             document.getElementById('modModal').style.display = 'flex';
         }
 
-        // Menu con: Chọn nhân vật (Alok / Ignis)
         function openRemoveCharacterMenu() {
             document.getElementById('modalTitle').innerText = "👤 XÓA MOD NHÂN VẬT";
             document.getElementById('modalBodyContent').innerHTML = `
@@ -1106,13 +1155,12 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             `;
         }
 
-        // Menu con: Chọn phiên bản Alok (FF Thường / FF Max)
         function openRemoveAlokVersionMenu() {
             document.getElementById('modalTitle').innerText = "⚔️ XÓA MOD ALOK";
             document.getElementById('modalBodyContent').innerHTML = `
                 <div class="modal-btn-group">
-                    <button class="modal-action-btn btn-blue" onclick="installMod('https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_n1fp8a.zip'); closeModalDirect();">💙 Xóa Alok - FF Thường</button>
-                    <button class="modal-action-btn btn-orange" onclick="installMod('https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_88yc31.zip'); closeModalDirect();">🧡 Xóa Alok - FF Max</button>
+                    <button class="modal-action-btn btn-blue" onclick="installMod('https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_n1fp8a.zip', 'Xóa Gốc Alok', 'FF Thường'); closeModalDirect();">💙 Xóa Alok - FF Thường</button>
+                    <button class="modal-action-btn btn-orange" onclick="installMod('https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_88yc31.zip', 'Xóa Gốc Alok', 'FF Max'); closeModalDirect();">🧡 Xóa Alok - FF Max</button>
                     <button class="modal-action-btn btn-gray" onclick="openRemoveCharacterMenu()">Quay Lại</button>
                 </div>
             `;
@@ -1121,25 +1169,80 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
         function closeModal(event) {
             document.getElementById('modModal').style.display = 'none';
         }
-
         function closeModalDirect() {
             document.getElementById('modModal').style.display = 'none';
         }
 
-        function installMod(url) {
+        // ==========================================================
+        // XỬ LÝ TOAST RGB VÀ TÍNH PHẦN TRĂM GIẢ LẬP
+        // ==========================================================
+        let toastSimulationInterval = null;
+
+        function showRGBToast(modName, version) {
+            const toastContainer = document.getElementById('customToastContainer');
+            const titleEl = document.getElementById('toastTitle');
+            const percentEl = document.getElementById('toastPercent');
+            const progressEl = document.getElementById('toastProgressBar');
+
+            // Reset dữ liệu ban đầu
+            clearInterval(toastSimulationInterval);
+            let percent = 0;
+            titleEl.innerText = `Đang tải: ${modName} (${version})`;
+            percentEl.innerText = `0%`;
+            percentEl.style.color = '#38bdf8'; // Màu xanh lúc đang tải
+            progressEl.style.width = `0%`;
+            progressEl.style.background = 'linear-gradient(90deg, #38bdf8, #2563eb)';
+            
+            // Hiện Toast (trượt từ trên xuống)
+            toastContainer.style.top = '30px';
+
+            // Chạy số % giả lập tốc độ tải thực tế
+            toastSimulationInterval = setInterval(() => {
+                // Random tốc độ nhảy % để tạo cảm giác giống đang tải file thật
+                let step = Math.floor(Math.random() * 15) + 5; 
+                percent += step;
+
+                if (percent >= 100) {
+                    percent = 100;
+                    clearInterval(toastSimulationInterval);
+                    
+                    // Cập nhật giao diện lúc 100%
+                    percentEl.innerText = `100%`;
+                    percentEl.style.color = '#4ade80'; // Chuyển màu xanh lá khi xong
+                    progressEl.style.width = `100%`;
+                    progressEl.style.background = 'linear-gradient(90deg, #4ade80, #16a34a)';
+                    titleEl.innerText = `✅ Đã cài đặt xong!`;
+
+                    // Tự động ẩn Toast sau 2.5 giây
+                    setTimeout(() => {
+                        toastContainer.style.top = '-120px';
+                    }, 2500);
+                } else {
+                    percentEl.innerText = `${percent}%`;
+                    progressEl.style.width = `${percent}%`;
+                }
+            }, 300); // 300ms cập nhật 1 lần
+        }
+
+        function installMod(url, modName, version) {
             if (!url || url.trim() === '') {
                 alert("Bản mod này chưa có link tải cho phiên bản này!");
                 return;
             }
+            
+            // Gọi hiển thị Toast HTML RGB
+            showRGBToast(modName, version);
+
+            // Gửi lệnh gốc xuống Java / Android Bridge để thực hiện tải và giải nén
             if (window.AndroidBridge) {
                 AndroidBridge.installModFromHtml(url);
             } else {
-                alert("Lỗi: Không tìm thấy cầu nối Android Bridge!");
+                console.log("Không tìm thấy Android Bridge! Link gốc: " + url);
             }
         }
 
+        // Lần đầu load
         renderModMenu();
     </script>
-
 </body>
-    </html>
+</html>
