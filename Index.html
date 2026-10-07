@@ -361,6 +361,7 @@
                 <button class="filter-chip" onclick="setCategoryFilter('character', this)">👤 Mod Nhân Vật</button>
                 <button class="filter-chip" onclick="setCategoryFilter('gun', this)">🔫 Mod Súng</button>
                 <button class="filter-chip" onclick="setCategoryFilter('anime', this)">⚡ Mod Anime</button>
+                <button class="filter-chip" onclick="setCategoryFilter('single', this)">📦 Mod Lẻ</button>
                 <button class="filter-chip" onclick="setCategoryFilter('other', this)">📦 Mod Khác</button>
             </div>
         </div>
@@ -382,6 +383,7 @@
         <button class="sidebar-btn" onclick="setCategoryFilter('character', null); toggleSidebar();">👤 Tất Cả Mod Nhân Vật</button>
         <button class="sidebar-btn" onclick="setCategoryFilter('gun', null); toggleSidebar();">🔫 Tất Cả Mod Súng</button>
         <button class="sidebar-btn" onclick="setCategoryFilter('anime', null); toggleSidebar();">⚡ Tất Cả Mod Anime</button>
+        <button class="sidebar-btn" onclick="setCategoryFilter('single', null); toggleSidebar();">📦 Tất Cả Mod Lẻ</button>
         <button class="sidebar-btn" onclick="setCategoryFilter('other', null); toggleSidebar();">📦 Tất Cả Mod Khác</button>
         <button class="sidebar-btn" onclick="openRemoveModMenu()" style="color: #ef4444;">🗑️ Xóa Mod (Gốc)</button>
         <button class="sidebar-btn" onclick="toggleSearchBox()">🔍 Tìm Kiếm Mod</button>
@@ -820,7 +822,7 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
 
         let parsedMods = [];
         let favorites = JSON.parse(localStorage.getItem('mz_favorites')) || [];
-        let currentCategory = 'all'; // 'all', 'favorites', 'character', 'gun', 'anime', 'other'
+        let currentCategory = 'all'; // 'all', 'favorites', 'character', 'gun', 'anime', 'single', 'other'
         let searchActive = false;
 
         // Bộ từ khóa phân loại nhận diện chuẩn xác
@@ -833,8 +835,9 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
         const animeKeywords = [
             'nakroth', 'thứ nguyên vệ thần', 'madara', 'itachi', 'sasuke', 'naruto', 
             'goku', 'luffy', 'nika', 'kaito kid', 'megumi', 'minato', 'bluelock', 'blue lock', 
-            'chidori', 'hỏa quyền', 'kakashi', 'tanjiro', 'zoro', 'saitama', 'nezuko', 'gojo', 'anime'
+            'chidori', 'hỏa quyền', 'kakashi', 'tanjiro', 'zoro', 'saitama', 'nezuko', 'gojo', 'anime', 'pain', 'all might'
         ];
+        const singleKeywords = ['mod lẻ', 'lẻ', 'áo lẻ', 'quần lẻ', 'mặt', 'balo', 'skywing', 'hành động', 'nấm đấm'];
 
         function parseModsText(text) {
             const blocks = text.trim().split(/\n\s*\n/);
@@ -873,13 +876,15 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             const isCharacter = characterKeywords.some(keyword => contentText.includes(keyword));
             const isGun = gunKeywords.some(keyword => contentText.includes(keyword));
             const isAnime = animeKeywords.some(keyword => contentText.includes(keyword));
+            const isSingle = singleKeywords.some(keyword => contentText.includes(keyword));
 
             if (currentCategory === 'all') return true;
             if (currentCategory === 'favorites') return favorites.includes(mod.id);
             if (currentCategory === 'character') return isCharacter;
             if (currentCategory === 'gun') return isGun;
             if (currentCategory === 'anime') return isAnime;
-            if (currentCategory === 'other') return !isCharacter && !isGun && !isAnime;
+            if (currentCategory === 'single') return isSingle;
+            if (currentCategory === 'other') return !isCharacter && !isGun && !isAnime && !isSingle;
             return true;
         }
 
@@ -898,6 +903,8 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
                 document.getElementById('pageTitle').innerText = "🔫 MOD SÚNG 🔫";
             } else if (currentCategory === 'anime') {
                 document.getElementById('pageTitle').innerText = "⚡ MOD ANIME ⚡";
+            } else if (currentCategory === 'single') {
+                document.getElementById('pageTitle').innerText = "📦 MOD LẺ 📦";
             } else if (currentCategory === 'other') {
                 document.getElementById('pageTitle').innerText = "📦 MOD KHÁC 📦";
             } else {
