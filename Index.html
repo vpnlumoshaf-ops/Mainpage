@@ -155,6 +155,7 @@
             opacity: 0.8;
             transform: scale(0.98);
         }
+
         /* Icon Trái tim góc trên bên phải ảnh */
         .favorite-icon {
             position: absolute;
@@ -173,11 +174,37 @@
             color: #ffffff;
             transition: 0.2s;
             user-select: none;
+            z-index: 5;
         }
         .favorite-icon.active {
             color: #ec4899; /* Màu hồng khi được thích */
             border-color: #ec4899;
             background: rgba(236, 72, 153, 0.2);
+        }
+
+        /* STICKER NEW MỚI GÓC TRÊN BÊN TRÁI */
+        .new-badge {
+            position: absolute;
+            top: 20px;
+            left: 12px; /* Đã chuyển sang bên trái thành công */
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+            border: 1px solid #fca5a5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 5;
+            animation: pulseNew 1.2s infinite alternate;
+            user-select: none;
+        }
+
+        @keyframes pulseNew {
+            0% { transform: scale(1); box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+            100% { transform: scale(1.08); box-shadow: 0 0 16px rgba(249, 115, 22, 0.9); }
         }
 
         .mod-footer {
@@ -343,21 +370,18 @@
         .btn-orange { background: #ea580c; }
         .btn-gray { background: #475569; }
 
-        /* ==============================================================
-           CUSTOM RGB TOAST CỦA BẠN 
-           ============================================================== */
+        /* CUSTOM RGB TOAST */
         #customToastContainer {
             position: fixed;
-            top: -120px; /* Ẩn đi mặc định */
+            top: -120px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 9999;
             width: 90%;
             max-width: 350px;
-            transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Hiệu ứng nảy mượt */
+            transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         
-        /* Hiệu ứng viền RGB */
         .rgb-toast-box {
             position: relative;
             background: #1e293b;
@@ -426,11 +450,11 @@
     <div class="app-container">
         <div class="header-bar">
             <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-            <h2 id="pageTitle">🔥 MZ TOOL V3 - 500 SKIN 🔥</h2>
-            <div style="width: 32px;"></div> <!-- Cân bằng header -->
+            <h2 id="pageTitle">🔥 MZTOOL 𝘝3 - MAINPAGE🔥</h2>
+            <div style="width: 32px;"></div>
         </div>
         
-        <!-- Thanh nút lọc nhanh vuốt ngang (Cố định) -->
+        <!-- Thanh nút lọc nhanh vuốt ngang -->
         <div class="filter-bar-container">
             <div class="filter-scroll" id="filterScroll">
                 <button class="filter-chip active" onclick="setCategoryFilter('all', this)">🏠 Tất Cả</button>
@@ -443,16 +467,16 @@
             </div>
         </div>
 
-        <!-- Thanh tìm kiếm (Cố định khi bật) -->
+        <!-- Thanh tìm kiếm -->
         <div class="search-container" id="searchContainer">
             <input type="text" id="searchInput" class="search-input" placeholder="🔍 Nhập tên mod cần tìm..." oninput="renderModMenu()">
         </div>
 
-        <!-- Danh sách mod cuộn dọc độc lập -->
+        <!-- Danh sách mod cuộn dọc -->
         <div id="mod-list-container"></div>
     </div>
 
-    <!-- Thanh Drawer Sidebar bên trái -->
+    <!-- Thanh Drawer Sidebar -->
     <div class="sidebar" id="mySidebar">
         <h3>Menu Tùy Chọn</h3>
         <button class="sidebar-btn" onclick="setCategoryFilter('all', null); toggleSidebar();" style="color: #38bdf8;">🏠 Xem Tất Cả Mod</button>
@@ -468,7 +492,7 @@
     </div>
     <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- Bảng Modal hiển thị mô tả hoặc xóa mod -->
+    <!-- Modal thông báo -->
     <div id="modModal" class="modal" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3 id="modalTitle">Tiêu đề mod</h3>
@@ -479,9 +503,7 @@
         </div>
     </div>
 
-    <!-- ==============================================
-         UI TOAST RGB HIỂN THỊ TRẠNG THÁI TẢI
-         ============================================== -->
+    <!-- Toast Status -->
     <div id="customToastContainer">
         <div class="rgb-toast-box">
             <div class="toast-title" id="toastTitle">Đang tải: Mod Tên...</div>
@@ -493,10 +515,25 @@
     </div>
 
     <script>
-        // =========================================================================
-        // DATA NGUỒN MOD
-        // =========================================================================
         const rawModData = `
+MOD GIÀY LÃNG TỬ VÂN LONG THÀNH THÁNH PHỒNG
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ffth lang tu van long thanh phong.zip
+FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ffm lang tu van long thanh phong.zip
+ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791452996.jpg
+newmota: Mới cập nhật phiên bản siêu xịn!
+
+MOD HĐ LƯỚT TRÊN MÂY THÀNH VÔ LƯỢNG KHÔNG SỨ
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ffth_lướt mây gojo.zip
+FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ffm_lướt trên mây_gojo.zip
+ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791430034.jpg
+mota: Bản mod này ẩn nút FFMax bằng lệnh ffmax: no
+
+MOD HĐ NGẠO NGHỄ THÀNH CƯỠI KHỦNG LONG OB55
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/FFTH_MOD HD NGAO NGHE THANH CUOI KHUNG LONG.zip
+FFMAX:
+ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791429261.jpg
+mota:
+
 Mod Skywing Cữu vĩ / Bích Long Thần v1
 ffth: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/MOD+SKYWING+BICH+LONG+THAN+TH%C3%80NH+KURAMA+FFTH.zip
 ffmax: 
@@ -575,11 +612,11 @@ FFMAX:
 ANH: https://lh3.googleusercontent.com/d/1dnUt5TjF-YkDUOCnVImyLFciNGDxGv2H
 MOTA: Null 
 
-MOD SET ALOK PAIN VIP
+MOD SKIN ALOK PAIN 
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_325ort.zip
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_11yi54.zip
 ANH: https://lh3.googleusercontent.com/d/1wMM1ewQPRxwZYM2feL8CK7ixqJxhEbcr
-MOTA: AO PAIN DEP VIP PROPLAYER 
+MOTA: ALOK PAIN
 
 MOD SKIN ALOK TT
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_b35wvf.zip
@@ -678,11 +715,11 @@ FFMAX:
 ANH: https://lh3.googleusercontent.com/d/1rD7PTSvo85o75kvkNk9CNg1kUTB7buAu
 MOTA: MOD SKIN ÁO ĐÁ BANH HỒNG QUẦN NGỦ ALOK
 
-MOD SKIN ALOK MINATO KÈM HĐ M1887 LV7 NGẦU
+MOD SKIN ALOK MINATO KÈM HĐ ɱ1887 LV7 NGẦU
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_f7ttib.zip
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_mza5sg.zip
 ANH: https://lh3.googleusercontent.com/d/1Zv2sTJq_gm4VTsGdbkxYJsquKBm6FLCe
-MOTA: ALOK TT MINATO KÈM HĐ M1887 LV7
+MOTA: ALOK TT MINATO KÈM HĐ ɱ1887 LV7
 
 MOD SKIN ALOK ÁO SAUKE QUẦN ĐỒNG PHỤC ANH
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_u8wffh.zip
@@ -690,11 +727,11 @@ FFMAX:
 ANH: https://lh3.googleusercontent.com/d/1oQHnhjYfdVojLD_Sm2Q6wa5b1_8uH7-X
 MOTA: ALOK SASUKE
 
-MOD SKIN ÁO ITACHI KÈM HĐ M1887 LV 7
+MOD SKIN ÁO ITACHI KÈM HĐ ɱ1887 LV 7
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_jfrkk7.zip
 FFMAX: 
 ANH: https://lh3.googleusercontent.com/d/1W1Pea9Kr1k_wvMZiYbzI3N4TPnDhDy4i
-MOTA: MOD ÁO ITACHI KÈM HĐ M1887 LV 7
+MOTA: MOD ÁO ITACHI KÈM HĐ ɱ1887 LV 7
 
 MOD M1887 PHONG XÀ THÀNH HỎA NỘ FULL HIỆU ỨNG
 FFTH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/M1887_hoano/ff_th.zip
@@ -707,6 +744,18 @@ FFTH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887
 ffmax: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887vutru/ff_max.zip
 anh: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887vutru/m1887vutru.jpg
 mota: MOD M1887 PHONG XÀ THÀNH VŨ TRỤ HỦY DIỆT LV7
+
+MOD M1887 VƯƠNG QUỐC CÁT CÓ ÂM THANH
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/items_mz_tool_26444177.zip
+FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/items_mz_tool_10493945.zip
+anh: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791378739.jpg
+mota: M1887 VQC ÂM THANH  +  ĐỖI SÚNG PX
+
+MOD COMBO M1887 VÀ MP40 LV7 PHONG XÀ
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/items_mz_tool_18606893.zip
+FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/items_mz_tool_47950663.zip
+ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791381684.jpg
+MOTA: COMBO 2 SÚNG M1887 VÀ MP40 LV7
 
 MOD M1014 HẢI VƯƠNG TRÊN LỄ HỘI TÍM
 FFTH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1014haivuong/ff_th.zip
@@ -735,19 +784,19 @@ MOTA: M590 DIGIMON HIỆU ỨNG TRÊN PHONG XÀ
 MOD M1887 phong xà mod thành M1887 Thánh phồng full hiệu ứng
 FFTH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887thanhphong/ff_th.zip
 FFMAX: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887thanhphong/ff_max.zip
-ANH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887thanhphong/m1887thanhphong.jpg
+ANH: https://raw.githubusercontent.com/leanhtuong2006/SkinFF/refs/heads/main/khosung/m1887thanhphong/m1887thanhphong.jpg
 MOTA: M1887 phong xà mod thành M1887 Thánh phồng
 
 MOD M1887 phong xà mod thành M1887 Thế Giới Ngầm full hiệu ứng
 FFTH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887thegioingam/ff_th.zip
 FFMAX: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887thegioingam/ff_max.zip
-ANH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/m1887thegioingam/m1887thegioingam.png
+ANH: https://raw.githubusercontent.com/leanhtuong2006/SkinFF/refs/heads/main/khosung/m1887thegioingam/m1887thegioingam.png
 MOTA: M1887 phong xà mod thành M1887 Thế Giới Ngầm full hiệu ứng
 
 MOD AUG PHƯỢNG HỎA THẦN TIỄN TRÊN AUG PHONG XÀ
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/items_mz_tool_31538100.zip
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/items_mz_tool_91054462.zip
-ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791371432.jpg
+ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791374534.jpg
 MOTA: MOD AUG PHƯỢNG HỎA THẦN TIỄN TRÊN AUG PHONG XÀ CÓ MÀN XUẤT HIỆN
 
 MOD MP40 TIA CHỚP TỬ THẦN LV7 TRÊN PHONG XÀ FULL HIỆU ỨNG
@@ -758,7 +807,7 @@ ANH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/mp40ti
 MOD MP40 MÃNG XÀ TRÊN PHONG XÀ FULL HIỆU ỨNG
 FFTH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/mp40mangxa/ff_th.zip
 FFMAX: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/mp40mangxa/ff_max.zip
-ANH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/mp40mangxa/mp40mangxa.jpg
+ANH: https://raw.githubusercontent.com/leanhtuong2006/SkinFF/refs/heads/main/khosung/mp40mangxa/mp40mangxa.jpg
 MOTA: FULL HIỆU ỨNG MP40 MÃNG XÀ LV 7
 
 MOD UMP PHONG CÁCH LV7 TRÊN PHONG XÀ
@@ -770,12 +819,18 @@ MOTA: UMP LV7 PHONG CÁCH
 MOD MP5 THIÊN THẦN BẠCH KIM LV 7 
 FFTH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/mp5thienthanbachkim/ff_th.zip
 FFMAX: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/mp5thienthanbachkim/ff_max.zip
-ANH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/khosung/mp5thienthanbachkim/mp5thienthanbachkim.jpg
+ANH: https://raw.githubusercontent.com/leanhtuong2006/SkinFF/refs/heads/main/khosung/mp5thienthanbachkim/mp5thienthanbachkim.jpg
 MOTA: MP5 LV7
+
+MOD AWM HỎA BĂNG TRÊN M1887 PHONG XÀ
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/M1887 PHONG XÀ SANG A...FFT ANDROID_mztoolvip.zip
+FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/M1887 PHONG XÀ SANG A...FFM ANDROID_mztoolvip.zip
+ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791424953.jpg
+MOTA: AWM HOA BANG TREN M1887 PHONG XA SKIN SUNG MOD
 
 MOD BALO VỢ IU THÀNH BĂNG QUYỀN 
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ffth+balo+v%E1%BB%A3+iu+-+b%C4%83ng+quy%E1%BB%81n+ffth.zip
-FFMAX: KO CÓ
+FFMAX:
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/refs/heads/main/Screenshot_20260831-134218_Free%20Fire.jpg
 
 MOD HĐ TẮM NẮNG THÀNH NGAI VÀNG
@@ -791,7 +846,7 @@ MOTA: Sài hành động bắn nèe , sau khi hết hành động m1887 LV 7 s�
 
 MOD SKIN ÁO SASUKE NÓN S2 ALOK 
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_me3cw6.zip
-FFMAX: Chưa Có
+FFMAX:
 ANH: https://lh3.googleusercontent.com/d/15LiqiOWMgY9QMmE5kT_afBLwIiicHEdX
 MOTA:  MOD SKIN ÁO SASUKE NÓN S2 ALOK        
 
@@ -807,17 +862,17 @@ FFMAX:
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1790824501.jpg
 MOTA: ÁO ITACHI QUẦN ÁC QUỶ ALOK
 
-MOD ALOK ÁO ITACHI KÈM HĐ M1887 LV 7
-FFTH: Dang Ra
+MOD ALOK ÁO ITACHI KÈM HĐ ɱ1887 LV 7
+FFTH:
 ffmax: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_wx1f6b.zip
 anh: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1790824927.jpg
 mota: Áo Itachi kèm tóc madara alok 
 
-MOD ALOK ITACHI KÈM HĐ M1887 LV 7 
+MOD ALOK ITACHI KÈM HĐ ɱ1887 LV 7 
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_4onecp.zip
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_x2p122.zip
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1790850055.jpg
-MOTA: MOD SKIN ALOK ITACHI SÓI CÔNG NGHỆ KÈM HĐ M1887 LV 7
+MOTA: MOD SKIN ALOK ITACHI SÓI CÔNG NGHỆ KÈM HĐ ɱ1887 LV 7
         
 MOD SKIN SASUKE ĐỒNG PHỤC ANH LÃNG KHÁCH TÍM      
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_7whch6.zip
@@ -825,15 +880,15 @@ FFMAX: KO CS
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1790850564.jpg
 MOTA: MOD SKIN SASUKE ĐỒNG PHỤC ANH LÃNG KHÁCH TÍM      / LKT   
 
-MOD SKIN ALOK QUẦN BĂNG CƯỚP ĐÊM KÈM HĐ G18 LV7
+MOD SKIN ALOK QUẦN BĂNG CƯỚP ĐÊM KÈM HĐ ｇ18 LV7
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_iwccs6.zip
-FFMAX: 
+FFMAX:
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1790850810.jpg
-MOTA: MOD SKIN ALOK QUẦN BĂNG CƯỚP ĐÊM KÈM HĐ G18 LV7
+MOTA: MOD SKIN ALOK QUẦN BĂNG CƯỚP ĐÊM KÈM HĐ ｇ18 LV7
 
 MOD SKIN ALOK ÁO ĐỨC 
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_lufpbm.zip
-FFMAX: NO CÓ
+FFMAX:
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1790850997.jpg
 MOTA: MOD SKIN ALOK ÁO ĐỨC BĂNG CƯỚP ĐÊM
 
@@ -843,7 +898,7 @@ FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_i
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1790952125.jpg
 MOTA: ALOK FULL SET QUÁI NHÂN HƯ KHÔNG, ĐỦ 2 PHIÊN BẢN
 
-MOD SKIN ALOK ÁO 3 LỖ TRẮNG KÈM HĐ M1887 LV 7
+MOD SKIN ALOK ÁO 3 LỖ TRẮNG KÈM HĐ ɱ1887 LV 7
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_tjhrih.zip
 FFMAX: LÊN KÊNH MACARA MODZ LẤY
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791004384.jpg
@@ -851,15 +906,15 @@ MOTA: ALOK AO ADAM
 
 MOD SKIN ALOK HỌA ĐIỂU CÓ CHUYỂN ĐỘNG
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_pwl9ca.zip
-FFMAX: 
+FFMAX:
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791004192.jpg
 MOTA: ÁO HỌA ĐIỂU CÓ CHUYỂN ĐỘNG ALOK
 
-MOD ISNIS VBTT , KIM LONG , NAM DAM
+MOD IGNIS VBTT , KIM LONG , NAM DAM
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ignis_mz_ypq24z.zip
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_ignis_mz_7mqw9a.zip
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791004861.jpg
-MOTA: MOD ISNIS VBTT , KIMG LONG , NAM DAM LỬA
+MOTA: MOD IGNIS VBTT , KIMG LONG , NAM DAM LỬA
 
 MOD ALOK ARGENTINA GIA NHẬP HẮC ẢNH
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_1tcbsi.zip
@@ -875,7 +930,7 @@ MOTA: CÓ CHUYỂN ĐỘNG ÁO ITACHI CÓ HIỆU ỨNG VÀ NẤM ĐẤM CHIDORI
 
 MOD IGNIS GOKU BẢN NĂNG VÔ CỰC
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ignis_mz_acaa53.zip
-FFMAX: Kh có haha
+FFMAX:
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791005726.jpg
 MOTA: MOD IGNIS GOKU BẢN NĂNG VÔ CỰC
 
@@ -890,23 +945,23 @@ ffth: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ite
 ffmax: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_item_app_mz_6ift2g.zip
 anh: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791117714.jpg
         
-MOD SKIN ALOK BÓNG ĐÁ ĐEN KÈM HĐ M1887 LV 7
+MOD SKIN ALOK BÓNG ĐÁ ĐEN KÈM HĐ ɱ1887 LV 7
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_th6n81.zip
 FFMAX: 
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791118827.jpg
-MOTA: MOD SKIN ALOK BÓNG ĐÁ ĐEN KÈM HĐ M1887 LV7
+MOTA: MOD SKIN ALOK BÓNG ĐÁ ĐEN KÈM HĐ ɱ1887 LV7
 
-MOD SKIN ÁO ĐỨC TRẺ TRÂU
+MOD SKIN ÁO ĐỨC TRẺ TRÂU ALOK
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_xxhkel.zip
-FFMAX: 
+FFMAX:
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791119116.jpg
-MOTA: MOD SKIN ÁO ĐỨC TRẺ TRÂU 
+MOTA: MOD SKIN ÁO ĐỨC TRẺ TRÂU ALOK TT
 
-MOD ALOK THỎ ĐỘT BIẾN ĐỎ KÈM HĐ FAMAS LV 7
+MOD ALOK THỎ ĐỘT BIẾN ĐỎ KÈM HĐ 𝙁𝙖𝙢𝙖𝙨 LV 7
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_item_app_mz_j7py02.zip
-FFMAX: 
+FFMAX:
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791196982.jpg
-MOTA: MOD ALOK THỎ ĐỘT BIẾN ĐỎ KÈM HĐ FAMAS LV 7
+MOTA: MOD ALOK THỎ ĐỘT BIẾN ĐỎ KÈM HĐ 𝙁𝙖𝙢𝙖s LV 7
 
 MOD LẺ ÁO ĐỚI MỘC BẠCH THÀNH THỎ THIÊN HÀ FULL HIỆU ỨNG
 FFTH: https://github.com/leanhtuong2006/SkinFF/raw/refs/heads/main/skaepo/aodoimocbach/ff_th.zip
@@ -918,7 +973,7 @@ MOD IGNIS ANIME LUFFY NIKA FF FFMAX
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ignis_mz_dgnddv.zip
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_ignis_mz_o9l1w9.zip
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791289725.jpg
-MOTA: LUFFY NIKA IGNIS ANIME GEAR 5
+mota: LUFFY NIKA IGNIS ANIME GEAR 5 CỰC HOT
 
 MOD SKIN IGNIS CHIDORI, ÁO FULL HIỆU ỨNG 
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ignis_mz_0l9rvr.zip
@@ -944,11 +999,30 @@ FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_i
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791294912.jpg
 MOTA: MOD IGNIS ÁO SASUKE FULL VFX , QUẦN THIÊN THẦN BẠCH KIM HIỆU ỨNG NẤM ĐẤM LÔI XÍCH QUYỀN
 
-Mod Ignis nakroth thứ nguyên vệ thần
+Mod Ignis 𝘕𝘢𝘬𝘳𝘰𝘵𝘩 thứ nguyên vệ thần
 FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_th_ignis_mz_wird50.zip
 FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ff_max_ignis_mz_zykq7b.zip
 ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791295226.jpg
-MOTA: nakroth thứ nguyên vệ thần IGNIS
+MOTA: 𝘕𝘢𝘬𝘳𝘰𝘵𝘩 thứ nguyên vệ thần IGNIS
+
+NHẸ TÂM KÈM KHÓA TÂM MẠNH, TĂNG FPS MÁY YẾU AN TOÀN 
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/Aimlock - Aimbot - Fps Booster FF Thường_1.zip
+FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/Aimlock - Aimbot - Fps Booster FF Maximum_1.zip
+ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791383335.jpg
+mota: Các bản nhẹ tâm, aimlock này đều được lọc kĩ càng trước khi đưa vào
+Lời khuyên: Test Acc Bot trước
+
+MOD ALOK FULL THỎ TRẮNG CHẾ
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/Media_to_git/main/ffth_tho_trang_Alok.zip
+FFMAX: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/ffmax_thoTrangBunnyAlokTT.zip
+anh: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791425241.jpg
+mota:
+
+MOD LẺ ÁO ĐÁ BANH VÀŅG THÀNH ÁO NGA
+FFTH: https://raw.githubusercontent.com/vpnlumoshaf-ops/modskinff/main/FFTH_ÁO BÓNG ĐÁ VÀŅG MOD ÁO NGA.zip
+FFMAX: no
+ANH: https://raw.githubusercontent.com/vpnlumoshaf-ops/Anhskin1/main/img_1791428451.jpg
+mota: Do Đây là đơn hàng khách order nên khg có ffmax , bạn muốn mua thì vào nhóm liên hệ mình nhé.
         `;
 
         let parsedMods = [];
@@ -969,6 +1043,7 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
         ];
         const singleKeywords = ['mod lẻ'];
 
+        // XỬ LÝ DỮ LIỆU CÓ HỖ TRỢ newmota: VÀ ẨN NÚT VỚI no / ko
         function parseModsText(text) {
             const blocks = text.trim().split(/\n\s*\n/);
             const list = [];
@@ -980,20 +1055,38 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
                     let ffmax = lines[2].replace(/^(ffmax:|ffmax\s*:)/i, '').trim();
                     let anh = lines[3].replace(/^(anh:|anh\s*:)/i, '').trim();
                     let mota = "Chưa có mô tả cho bản mod này.";
+                    let isNew = false;
                     
                     if (lines.length >= 5) {
                         let line4 = lines[4].trim();
-                        let cleanedMota = line4.replace(/^(mota:|mota\s*:)/i, '').trim();
-                        if (cleanedMota && cleanedMota.toLowerCase() !== 'ko') {
-                            mota = cleanedMota + " - 🔥";
+                        // Kiểm tra newmota:
+                        if (/^newmota:/i.test(line4)) {
+                            isNew = true;
+                            let cleanedMota = line4.replace(/^newmota:/i, '').trim();
+                            if (cleanedMota && cleanedMota.toLowerCase() !== 'ko' && cleanedMota.toLowerCase() !== 'no') {
+                                mota = cleanedMota + " - 🔥";
+                            }
+                        } else if (/^mota:/i.test(line4)) {
+                            let cleanedMota = line4.replace(/^mota:/i, '').trim();
+                            if (cleanedMota && cleanedMota.toLowerCase() !== 'ko' && cleanedMota.toLowerCase() !== 'no') {
+                                mota = cleanedMota + " - 🔥";
+                            }
                         }
                     }
                     
-                    if (anh.toLowerCase() === 'ko' || anh === '') {
+                    if (anh.toLowerCase() === 'ko' || anh.toLowerCase() === 'no' || anh === '') {
                         anh = 'https://via.placeholder.com/600x200?text=Macara+Modz';
                     }
                     
-                    list.push({ id: index, name, image: anh, linkFFTh: ffth, linkFFMax: ffmax, mota: mota });
+                    list.push({ 
+                        id: index, 
+                        name: name, 
+                        image: anh, 
+                        linkFFTh: ffth, 
+                        linkFFMax: ffmax, 
+                        mota: mota, 
+                        isNew: isNew 
+                    });
                 }
             });
             return list;
@@ -1029,7 +1122,7 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             else if (currentCategory === 'anime') document.getElementById('pageTitle').innerText = "⚡ MOD ANIME ⚡";
             else if (currentCategory === 'single') document.getElementById('pageTitle').innerText = "🎭 MOD LẺ 🎭";
             else if (currentCategory === 'other') document.getElementById('pageTitle').innerText = "📦 MOD KHÁC 📦";
-            else document.getElementById('pageTitle').innerText = "🔥 MZ TOOL V3 - 500 SKIN 🔥";
+            else document.getElementById('pageTitle').innerText = "🔥 MZTOOL 𝘝3 - MAINPAGE🔥";
 
             if (searchActive) {
                 const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -1048,11 +1141,20 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
                 let isFav = favorites.includes(mod.id);
                 let favClass = isFav ? 'favorite-icon active' : 'favorite-icon';
                 
-                // Encode nháy đơn tránh lỗi JS
                 let safeName = mod.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+                let showFFTh = mod.linkFFTh && !['no', 'ko', 'null', ''].includes(mod.linkFFTh.toLowerCase().trim());
+                let showFFMax = mod.linkFFMax && !['no', 'ko', 'null', ''].includes(mod.linkFFMax.toLowerCase().trim());
+
+                let btnFFThHtml = showFFTh ? `<button class="btn btn-ffth" onclick="installMod('${mod.linkFFTh}', '${safeName}', 'FF Thường')">FF Thường</button>` : '';
+                let btnFFMaxHtml = showFFMax ? `<button class="btn btn-ffmax" onclick="installMod('${mod.linkFFMax}', '${safeName}', 'FF Max')">FF Max</button>` : '';
+
+                // STICKER NEW BÊN TRÁI
+                let newBadgeHtml = mod.isNew ? `<div class="new-badge">NEW</div>` : '';
 
                 htmlContent += `
                     <div class="mod-card">
+                        ${newBadgeHtml}
                         <div class="${favClass}" onclick="toggleFavorite(${mod.id})">❤️</div>
                         <img src="${mod.image}" alt="Banner" onclick="showDesc(${mod.id})" onerror="this.src='https://via.placeholder.com/600x200?text=No+Image'">
                         <div class="mod-footer">
@@ -1060,8 +1162,8 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
                                 <h4>${index + 1}. ${mod.name}</h4>
                             </div>
                             <div class="btn-group">
-                                <button class="btn btn-ffth" onclick="installMod('${mod.linkFFTh}', '${safeName}', 'FF Thường')">FF Thường</button>
-                                <button class="btn btn-ffmax" onclick="installMod('${mod.linkFFMax}', '${safeName}', 'FF Max')">FF Max</button>
+                                ${btnFFThHtml}
+                                ${btnFFMaxHtml}
                             </div>
                         </div>
                     </div>
@@ -1173,9 +1275,6 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             document.getElementById('modModal').style.display = 'none';
         }
 
-        // ==========================================================
-        // XỬ LÝ TOAST RGB VÀ TÍNH PHẦN TRĂM GIẢ LẬP
-        // ==========================================================
         let toastSimulationInterval = null;
 
         function showRGBToast(modName, version) {
@@ -1184,21 +1283,17 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
             const percentEl = document.getElementById('toastPercent');
             const progressEl = document.getElementById('toastProgressBar');
 
-            // Reset dữ liệu ban đầu
             clearInterval(toastSimulationInterval);
             let percent = 0;
             titleEl.innerText = `Đang tải: ${modName} (${version})`;
             percentEl.innerText = `0%`;
-            percentEl.style.color = '#38bdf8'; // Màu xanh lúc đang tải
+            percentEl.style.color = '#38bdf8';
             progressEl.style.width = `0%`;
             progressEl.style.background = 'linear-gradient(90deg, #38bdf8, #2563eb)';
             
-            // Hiện Toast (trượt từ trên xuống)
             toastContainer.style.top = '30px';
 
-            // Chạy số % giả lập tốc độ tải thực tế
             toastSimulationInterval = setInterval(() => {
-                // Random tốc độ nhảy % để tạo cảm giác giống đang tải file thật
                 let step = Math.floor(Math.random() * 15) + 5; 
                 percent += step;
 
@@ -1206,14 +1301,12 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
                     percent = 100;
                     clearInterval(toastSimulationInterval);
                     
-                    // Cập nhật giao diện lúc 100%
                     percentEl.innerText = `100%`;
-                    percentEl.style.color = '#4ade80'; // Chuyển màu xanh lá khi xong
+                    percentEl.style.color = '#4ade80';
                     progressEl.style.width = `100%`;
                     progressEl.style.background = 'linear-gradient(90deg, #4ade80, #16a34a)';
                     titleEl.innerText = `✅ Đã cài đặt xong!`;
 
-                    // Tự động ẩn Toast sau 2.5 giây
                     setTimeout(() => {
                         toastContainer.style.top = '-120px';
                     }, 2500);
@@ -1221,27 +1314,24 @@ MOTA: nakroth thứ nguyên vệ thần IGNIS
                     percentEl.innerText = `${percent}%`;
                     progressEl.style.width = `${percent}%`;
                 }
-            }, 300); // 300ms cập nhật 1 lần
+            }, 300);
         }
 
         function installMod(url, modName, version) {
-            if (!url || url.trim() === '') {
+            if (!url || url.trim() === '' || url.toLowerCase() === 'no' || url.toLowerCase() === 'ko') {
                 alert("Bản mod này chưa có link tải cho phiên bản này!");
                 return;
             }
             
-            // Gọi hiển thị Toast HTML RGB
             showRGBToast(modName, version);
 
-            // Gửi lệnh gốc xuống Java / Android Bridge để thực hiện tải và giải nén
             if (window.AndroidBridge) {
                 AndroidBridge.installModFromHtml(url);
             } else {
-                console.log("Không tìm thấy Android Bridge! Link gốc: " + url);
+                console.log("Không tìm thấy Android Bridge! Link: " + url);
             }
         }
 
-        // Lần đầu load
         renderModMenu();
     </script>
 </body>
